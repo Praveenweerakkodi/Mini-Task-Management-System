@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-// @RequiredArgsConstructor: Lombok generates a constructor for all 'final' fields
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
