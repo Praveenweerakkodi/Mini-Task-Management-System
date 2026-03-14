@@ -1,7 +1,5 @@
 package com.taskmanager.repository;
 
-// Task repository - handles all database queries for tasks
-// Includes custom queries for filtering by status/priority and for pagination
 
 import com.taskmanager.entity.Task;
 import com.taskmanager.enums.Priority;
@@ -16,10 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    // ---- For regular users: only see their own tasks ----
 
-    // Get all tasks for a specific user (with pagination and sorting)
-    // Pageable parameter is passed from the controller and handles pagination + sorting automatically
     Page<Task> findByUserId(Long userId, Pageable pageable);
 
     // Filter by status only (for a specific user)
@@ -32,9 +27,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Page<Task> findByUserIdAndStatusAndPriority(Long userId, TaskStatus status, Priority priority, Pageable pageable);
 
     // ---- For ADMIN: see ALL tasks ----
-
-    // Get all tasks in the system (no user filter) - already provided by JpaRepository.findAll(Pageable)
-
     // Filter all tasks by status only
     Page<Task> findByStatus(TaskStatus status, Pageable pageable);
 
@@ -45,8 +37,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Page<Task> findByStatusAndPriority(TaskStatus status, Priority priority, Pageable pageable);
 
     // Custom JPQL query to filter with optional parameters
-    // JPQL uses class/field names (not table/column names)
-    // :status IS NULL means "if no status filter provided, ignore this condition"
     @Query("SELECT t FROM Task t WHERE " +
            "(:userId IS NULL OR t.user.id = :userId) AND " +
            "(:status IS NULL OR t.status = :status) AND " +

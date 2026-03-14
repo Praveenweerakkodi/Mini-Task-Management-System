@@ -6,30 +6,30 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("USER");
+  const [role, setRole] = useState("USER"); 
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
 
-  const { register } = useAuth(); 
+  const { register } = useAuth();
   const router = useRouter();
 
-  
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
-    setLoading(true); 
-    setError("");     
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
     try {
-
-      await login(email, password);
-
+      
+      await register(name, email, password, role);
+      
       router.push("/tasks");
     } catch (err) {
-      const msg = err.response?.data?.message || "Login failed. Please try again.";
+      const msg = err.response?.data?.message || "Registration failed. Please try again.";
       setError(msg);
     } finally {
       setLoading(false);
@@ -39,53 +39,79 @@ export default function RegisterPage() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        {/* Header */}
         <h1 style={styles.title}>📋 Task Manager</h1>
-        <h2 style={styles.subtitle}>Login to your account</h2>
+        <h2 style={styles.subtitle}>Create an account</h2>
 
-        {/* Error Message */}
+        {/* Error message */}
         {error && <div style={styles.errorBox}>{error}</div>}
 
-        {/* Login Form */}
         <form onSubmit={handleSubmit} suppressHydrationWarning>
-          {/* Email field */}
+          {/* Name */}
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>Email</label>
+            <label style={styles.label}>Full Name</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)} 
-              placeholder="Enter your email"
-              required 
-              style={styles.input}
-              suppressHydrationWarning
-            />
-          </div>
-
-          {/* Password field */}
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
               required
               style={styles.input}
               suppressHydrationWarning
             />
           </div>
 
-          {/* Submit button */}
+          {/* Email */}
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              style={styles.input}
+              suppressHydrationWarning
+            />
+          </div>
+
+          {/* Password */}
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+              required
+              minLength={6}
+              style={styles.input}
+              suppressHydrationWarning
+            />
+          </div>
+
+          {/* Role selection */}
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Role</label>
+
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={styles.input}
+              suppressHydrationWarning
+            >
+              <option value="USER">USER - Manage your own tasks</option>
+              <option value="ADMIN">ADMIN - View all tasks</option>
+            </select>
+          </div>
+
           <button type="submit" disabled={loading} style={styles.button} suppressHydrationWarning>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Creating account..." : "Register"}
           </button>
         </form>
 
-        {/* Link to register page */}
         <p style={styles.switchText}>
-          Don't have an account?{" "}
-          <a href="/register" style={styles.link}>Register here</a>
+          Already have an account?{" "}
+          <a href="/login" style={styles.link}>Login here</a>
         </p>
       </div>
     </div>
@@ -148,12 +174,11 @@ const styles = {
     borderRadius: "6px",
     fontSize: "14px",
     boxSizing: "border-box",
-    outline: "none",
   },
   button: {
     width: "100%",
     padding: "12px",
-    backgroundColor: "#2c3e50",
+    backgroundColor: "#27ae60",
     color: "white",
     border: "none",
     borderRadius: "6px",

@@ -1,15 +1,6 @@
 package com.taskmanager.controller;
 
-// TaskController: Handles all task-related endpoints
-// All endpoints REQUIRE a valid JWT token (configured in SecurityConfig)
-//
-// Endpoints:
-//   GET    /api/tasks           → Get all tasks (with optional filters, pagination, sorting)
-//   GET    /api/tasks/{id}      → Get single task
-//   POST   /api/tasks           → Create new task
-//   PUT    /api/tasks/{id}      → Update task
-//   DELETE /api/tasks/{id}      → Delete task
-//   PATCH  /api/tasks/{id}/complete → Mark task as done
+
 
 import com.taskmanager.dto.TaskRequest;
 import com.taskmanager.dto.TaskResponse;
@@ -35,33 +26,23 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    // GET /api/tasks
-    // Query parameters (all optional):
-    //   ?status=TODO          → filter by status
-    //   ?priority=HIGH        → filter by priority
-    //   ?page=0               → page number (0-indexed, default 0)
-    //   ?size=10              → items per page (default 10)
-    //   ?sortBy=dueDate       → sort field (dueDate or priority)
-    //   ?sortDir=asc          → sort direction (asc or desc)
     @GetMapping
     public ResponseEntity<Page<TaskResponse>> getTasks(
             // @AuthenticationPrincipal: Spring injects the currently logged-in user
-            // This is set by JwtAuthFilter when it validates the JWT token
             @AuthenticationPrincipal User currentUser,
 
             // @RequestParam(required = false): query parameter is optional
             @RequestParam(required = false) TaskStatus status,
             @RequestParam(required = false) Priority priority,
-            @RequestParam(defaultValue = "0") int page,        // Default: first page
-            @RequestParam(defaultValue = "10") int size,       // Default: 10 items per page
-            @RequestParam(defaultValue = "createdAt") String sortBy,  // Default: sort by creation date
-            @RequestParam(defaultValue = "desc") String sortDir        // Default: newest first
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
         // Build the sort direction
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
 
         // Pageable combines pagination + sorting into one object
-        // PageRequest.of(page, size, sort) creates this object
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         Page<TaskResponse> tasks = taskService.getTasks(currentUser, status, priority, pageable);
@@ -69,7 +50,6 @@ public class TaskController {
     }
 
     // GET /api/tasks/{id}
-    // @PathVariable: gets the {id} value from the URL
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponse> getTaskById(
             @PathVariable Long id,
@@ -91,7 +71,6 @@ public class TaskController {
     }
 
     // PUT /api/tasks/{id}
-    // @Valid triggers validation on TaskRequest fields
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTask(
             @PathVariable Long id,
@@ -114,8 +93,6 @@ public class TaskController {
     }
 
     // PATCH /api/tasks/{id}/complete
-    // PATCH is used for partial updates (just changing the status to DONE)
-    // vs PUT which replaces the entire resource
     @PatchMapping("/{id}/complete")
     public ResponseEntity<TaskResponse> markComplete(
             @PathVariable Long id,

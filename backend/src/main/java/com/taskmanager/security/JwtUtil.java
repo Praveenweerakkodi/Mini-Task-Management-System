@@ -1,10 +1,5 @@
 package com.taskmanager.security;
 
-// JwtUtil: A utility class that handles everything related to JWT tokens
-// JWT = JSON Web Token
-// It has 3 parts separated by dots: header.payload.signature
-// Example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGVtYWlsLmNvbSJ9.abc123
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,11 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-// @Component tells Spring to manage this class as a bean (we can @Autowire it anywhere)
 @Component
 public class JwtUtil {
 
-    // These values are read from application.properties which reads from environment variables
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -44,12 +37,12 @@ public class JwtUtil {
     // Build the actual JWT token string
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
-                .setClaims(extraClaims)                     // Add extra data (role)
-                .setSubject(userDetails.getUsername())      // Subject = email (identifies the user)
-                .setIssuedAt(new Date(System.currentTimeMillis())) // When token was created
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration)) // When token expires
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Sign with our secret key
-                .compact(); // Build the final token string
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // ---- Token Validation ----
@@ -74,7 +67,6 @@ public class JwtUtil {
     }
 
     // Generic method to extract any piece of data from the token's claims
-    // claimsResolver is a function that says "what data do you want from the claims?"
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -83,7 +75,7 @@ public class JwtUtil {
     // Parse the token and get all claims (the data inside the token)
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey()) // Use our secret key to verify the signature
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -95,7 +87,6 @@ public class JwtUtil {
     }
 
     // Convert our secret string into a proper cryptographic key
-    // The key is used to sign tokens so nobody can fake them without knowing the secret
     private Key getSigningKey() {
         byte[] keyBytes = secretKey.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);

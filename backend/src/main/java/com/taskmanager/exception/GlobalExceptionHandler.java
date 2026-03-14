@@ -1,10 +1,5 @@
 package com.taskmanager.exception;
 
-// GlobalExceptionHandler: One place to handle ALL exceptions across the entire app
-// Instead of writing try-catch blocks in every controller,
-// we define error handling here and Spring automatically uses it
-//
-// This is also called "centralized exception handling" - a clean architecture practice
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,32 +14,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 // @RestControllerAdvice = @ControllerAdvice + @ResponseBody
-// It means: "this class intercepts exceptions from all controllers and returns JSON responses"
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     // ---- Helper method to create a consistent error response map ----
-    // All error responses will have the same structure: status, message, timestamp
     private Map<String, Object> buildErrorBody(HttpStatus status, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", status.value());     // e.g., 404
-        body.put("error", status.getReasonPhrase()); // e.g., "Not Found"
-        body.put("message", message);           // e.g., "Task not found with id: 5"
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
         return body;
     }
 
     // ---- Handle Resource Not Found (404) ----
-    // Called when code throws: throw new ResourceNotFoundException("...")
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
         return ResponseEntity
-                .status(HttpStatus.NOT_FOUND) // HTTP 404
+                .status(HttpStatus.NOT_FOUND)
                 .body(buildErrorBody(HttpStatus.NOT_FOUND, ex.getMessage()));
     }
 
     // ---- Handle Validation Errors (400) ----
-    // Called when @Valid fails in a controller (e.g., missing required field)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
         // Collect all field errors into a map: {fieldName: errorMessage}
@@ -54,22 +45,20 @@ public class GlobalExceptionHandler {
         }
 
         Map<String, Object> body = buildErrorBody(HttpStatus.BAD_REQUEST, "Validation failed");
-        body.put("fieldErrors", fieldErrors); // Add specific field errors
+        body.put("fieldErrors", fieldErrors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     // ---- Handle Bad Credentials (401) ----
-    // Called when login fails (wrong email or password)
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED) // HTTP 401
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(buildErrorBody(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
     }
 
     // ---- Handle Illegal Arguments (400) ----
-    // Called when something like "invalid role value" is passed
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity
@@ -78,7 +67,6 @@ public class GlobalExceptionHandler {
     }
 
     // ---- Handle Any Other Unexpected Errors (500) ----
-    // Catches everything else - safety net
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         return ResponseEntity

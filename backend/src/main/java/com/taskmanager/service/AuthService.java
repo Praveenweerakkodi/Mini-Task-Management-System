@@ -1,8 +1,6 @@
 package com.taskmanager.service;
 
-// AuthService: Handles all authentication-related logic
-// register() → creates a new user account
-// login() → verifies credentials and returns a JWT token
+
 
 import com.taskmanager.dto.AuthResponse;
 import com.taskmanager.dto.LoginRequest;
@@ -22,9 +20,9 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // BCrypt from SecurityConfig
+    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager; // From SecurityConfig
+    private final AuthenticationManager authenticationManager;
 
     // ---- Register a new user ----
     public AuthResponse register(RegisterRequest request) {
@@ -45,7 +43,6 @@ public class AuthService {
         }
 
         // Create the User entity
-        // IMPORTANT: We hash the password before saving! Never store plain text passwords.
         User newUser = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
@@ -66,21 +63,15 @@ public class AuthService {
     // ---- Login an existing user ----
     public AuthResponse login(LoginRequest request) {
 
-        // AuthenticationManager handles the actual verification:
-        // It calls CustomUserDetailsService to load the user by email,
-        // then compares the entered password with the stored BCrypt hash
-        // If wrong email or password, it throws BadCredentialsException
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),    // username (email in our case)
-                        request.getPassword()  // raw password (BCrypt comparison happens here)
+                        request.getEmail(),
+                        request.getPassword()
                 )
         );
 
-        // If we reach here, authentication was SUCCESSFUL
-        // Now find the user to get their details for the response
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found")); // Should never happen
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Generate a JWT token for this user
         String token = jwtUtil.generateToken(user);

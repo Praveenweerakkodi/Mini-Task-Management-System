@@ -1,29 +1,34 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+
   const [email, setEmail] = useState("");
-  const [password, setPassowrd] = useState("");
+  const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { login } = useAuth();
+  const { login } = useAuth(); 
   const router = useRouter();
 
-    const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault(); 
 
     setLoading(true); 
-    setError("");    
+    setError("");     
+
     try {
-            await login(email, password);
+
+      await login(email, password);
+
 
       router.push("/tasks");
     } catch (err) {
-      
+
       const msg = err.response?.data?.message || "Login failed. Please try again.";
       setError(msg);
     } finally {
@@ -34,61 +39,53 @@ export default function LoginPage() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
+        {/* Header */}
         <h1 style={styles.title}>📋 Task Manager</h1>
         <h2 style={styles.subtitle}>Login to your account</h2>
 
         {/* Error Message */}
         {error && <div style={styles.errorBox}>{error}</div>}
 
-        {/* login form */}
+        {/* Login Form */}
         <form onSubmit={handleSubmit} suppressHydrationWarning>
-          <div style={styles.filedGroup}>
-            <label style={styles.lable}>Email</label>
-            {/* email field */}
+          {/* Email field */}
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Email</label>
             <input
               type="email"
               value={email}
-              required
-              placeholder="Enter your email.."
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
+              onChange={(e) => setEmail(e.target.value)} 
+              placeholder="Enter your email"
+              required 
               style={styles.input}
               suppressHydrationWarning
             />
           </div>
 
+          {/* Password field */}
           <div style={styles.fieldGroup}>
-            {/* password field */}
+            <label style={styles.label}>Password</label>
             <input
               type="password"
               value={password}
-              placeholder="Enter your password.."
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
               required
-              onChange={(e) => {
-                setPassowrd(e.target.value);
-              }}
-              style={styels.input}
+              style={styles.input}
               suppressHydrationWarning
             />
           </div>
 
-          {/* submit btn */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={styles.button}
-            suppressHydrationWarning
-          >
-            {loading ? "Loggin in.." : "Login"}
+          {/* Submit button */}
+          <button type="submit" disabled={loading} style={styles.button} suppressHydrationWarning>
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
+        {/* Link to register page */}
         <p style={styles.switchText}>
-          Don't have an account ? {""}
-          <a href="/register" style={styles.link}>
-            Register here
-          </a>
+          Don't have an account?{" "}
+          <a href="/register" style={styles.link}>Register here</a>
         </p>
       </div>
     </div>

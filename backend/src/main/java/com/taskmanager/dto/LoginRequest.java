@@ -1,7 +1,6 @@
 package com.taskmanager.dto;
 
-// LoginRequest: The data a user sends when they log in
-// Just email and password
+
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
